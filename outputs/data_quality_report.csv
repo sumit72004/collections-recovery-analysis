@@ -1,0 +1,18 @@
+issue,detection_method,treatment,business_impact
+Duplicate payment IDs,group by payment_id,keep latest row per payment_id; SUCCESS only,500 duplicate IDs; ₹2.59 Cr duplicate SUCCESS value removed
+Payment-reference collision,group payment_reference by account_id,never use payment_reference as global payment key,3407 references span multiple accounts
+Account-borrower conflict: calls,join on account_id and compare borrower_id,use account_id spine; quarantine conflicting borrower_id,"91,342/91,350 (99.99%)"
+Account-borrower conflict: call_attempts,join on account_id and compare borrower_id,use account_id spine; quarantine conflicting borrower_id,"119,989/120,000 (99.99%)"
+Account-borrower conflict: call_dispositions,join on account_id and compare borrower_id,use account_id spine; quarantine conflicting borrower_id,"34,998/35,000 (99.99%)"
+Account-borrower conflict: payments,join on account_id and compare borrower_id,use account_id spine; quarantine conflicting borrower_id,"25,499/25,500 (100.00%)"
+Account-borrower conflict: PTP,join on account_id and compare borrower_id,use account_id spine; quarantine conflicting borrower_id,"17,999/18,000 (99.99%)"
+Account-borrower conflict: field_visits,join on account_id and compare borrower_id,use account_id spine; quarantine conflicting borrower_id,"24,998/25,000 (99.99%)"
+Account-borrower conflict: WhatsApp,join on account_id and compare borrower_id,use account_id spine; quarantine conflicting borrower_id,"60,596/60,600 (99.99%)"
+Account-borrower conflict: SMS,join on account_id and compare borrower_id,use account_id spine; quarantine conflicting borrower_id,"44,995/45,000 (99.99%)"
+Agent ID instability,group agent_id and count distinct identity fields,do not use agent_id alone historically; create effective-dated identity map,"1,000/1,000 agent IDs have conflicting identity fields"
+Duplicate call IDs,group by call_id,dedupe call_id; investigate timestamp conflicts,"1,350 call IDs duplicated; 11 have conflicting timestamps"
+Disposition/status contradiction,join dispositions to call status,RPC requires ANSWERED call,"12,422 RPC-like dispositions on non-ANSWERED calls"
+Late-arriving events,compare recorded_at with event_at,watermark + replay/backfill,0.0% of status-history rows arrive >24h late
+Mixed timezones,inspect source timezone fields,normalize to documented reporting timezone; preserve source timezone,calls use 3 timezones; accounts use 3
+Borrower master overwrite,count distinct borrower attributes by borrower_id,use point-in-time snapshot where available; do not trust current row as historical,"8,399 borrower IDs have changing phone values"
+Repeated account-date targeting,"group account_id,target_date","retain as multiple campaign exposures, not duplicate events",160 account-date pairs repeat
